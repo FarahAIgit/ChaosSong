@@ -183,7 +183,7 @@ const SunoPromptGenerator = () => {
                   onChange={(e) => setInstrumentalMode(e.target.checked)}
                   style={{ accentColor: '#c946ff' }}
                 />
-                <span>🎵 Instrumental (no lyrics)</span>
+                <span> Instrumental (no lyrics)</span>
               </label>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -344,3 +344,4 @@ const SunoPromptGenerator = () => {
 };
 
 export default SunoPromptGenerator;
+
