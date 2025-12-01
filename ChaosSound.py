@@ -203,7 +203,7 @@ const SunoPromptGenerator = () => {
                   onChange={(e) => setPureChaosMood(e.target.checked)}
                   style={{ accentColor: '#c946ff' }}
                 />
-                <span>🌀 Pure Chaos Mode (invented words)</span>
+                <span>Pure Chaos Mode (invented words)</span>
               </label>
 
               <button
@@ -344,5 +344,6 @@ const SunoPromptGenerator = () => {
 };
 
 export default SunoPromptGenerator;
+
 
 
