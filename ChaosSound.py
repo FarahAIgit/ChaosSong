@@ -266,9 +266,10 @@ st.markdown("---")
 st.markdown(
     """
     <div style="text-align: center; color: #a8a6a3; font-size: 0.9rem;">
-        <p>Adapted from ChaosPrompt by <a href="https://x.com/Farah_ai_" style="color: #c946ff;">@Farah_ai_</a></p>
+        <p>Adapted from <a href="https://chaosprompt.streamlit.app/" style="color: #c946ff;">ChaosPrompt</a> by <a href="https://x.com/Farah_ai_" style="color: #c946ff;">@Farah_ai_</a></p>
         <p style="font-style: italic; margin-top: 0.5rem;">~ Let the chaos harmonize ~</p>
     </div>
     """,
     unsafe_allow_html=True
 )
+
