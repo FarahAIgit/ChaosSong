@@ -1,349 +1,274 @@
-import React, { useState } from 'react';
-import { Music, Sparkles, Copy, Check } from 'lucide-react';
+import streamlit as st
+import random
 
-const SunoPromptGenerator = () => {
-  const [prompt, setPrompt] = useState('');
-  const [lyrics, setLyrics] = useState('');
-  const [instrumentalMode, setInstrumentalMode] = useState(false);
-  const [addMetatags, setAddMetatags] = useState(true);
-  const [pureChaosMood, setPureChaosMood] = useState(false);
-  const [copied, setCopied] = useState(false);
+st.set_page_config(page_title="Suno Chaos Generator", layout="wide")
 
-  // Musical genres and styles
-  const GENRES = [
+# ---------------------------
+# Dark styling with purple accents
+# ---------------------------
+st.markdown(
+    """
+    <style>
+    body { background-color: #0a0a0f; color: #e8e6e3; font-family: 'Courier New', monospace; }
+    .stApp { 
+        min-height: 100vh; 
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a0a1f 100%);
+    }
+    .stTextArea textarea { background: rgba(10,10,12,0.7); color: #e8e6e3; border: 1px solid #2f2f31; }
+    .stButton>button { 
+        background-color:#c946ff; 
+        color:#ffffff; 
+        border-radius:8px; 
+        padding:12px 20px;
+        font-weight: bold;
+    }
+    .stButton>button:hover {
+        background-color: #a635d9;
+    }
+    .block-container { 
+        padding: 2rem; 
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        max-width: 1200px;
+    }
+    h1 { color: #c946ff; font-family: 'Courier New', monospace; }
+    h2,h3 { color: #ff8c00; font-family: 'Courier New', monospace; }
+    .footer { color:#a8a6a3; font-size:12px; margin-top:8px; }
+    .stCodeBlock { background: rgba(10,10,12,0.7); }
+    .stCodeBlock code { 
+        white-space: pre-wrap !important; 
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    .stCodeBlock pre {
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    .stCheckbox input[type="checkbox"]:checked {
+        background-color: #c946ff !important;
+        border-color: #c946ff !important;
+    }
+    .stCheckbox [data-testid="stCheckbox"] input:checked ~ span {
+        background-color: #c946ff !important;
+        border-color: #c946ff !important;
+    }
+    .info-box {
+        background: rgba(255, 140, 0, 0.1);
+        border: 1px solid #ff8c00;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <div style="text-align:center;">
+        <h1>🎵 Suno Chaos Generator ✨</h1>
+        <p style="color: #a8a6a3; font-style: italic;">Surreal music prompt generation for Suno AI</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown("---")
+
+# ---------------------------
+# Musical genres and styles
+# ---------------------------
+GENRES = [
     'ambient', 'experimental', 'ethereal wave', 'dark ambient', 'drone',
     'post-rock', 'shoegaze', 'dream pop', 'downtempo', 'trip-hop',
     'neo-classical', 'avant-garde', 'minimal techno', 'industrial',
     'witch house', 'vaporwave', 'chillwave', 'synthwave', 'darkwave',
     'psychedelic', 'folk', 'chamber pop', 'art pop', 'glitch',
     'noise', 'space music', 'cosmic', 'cinematic', 'orchestral'
-  ];
+]
 
-  const MOODS = [
+MOODS = [
     'melancholic', 'haunting', 'mysterious', 'ethereal', 'dreamy',
     'dark', 'atmospheric', 'hypnotic', 'meditative', 'introspective',
     'surreal', 'nostalgic', 'eerie', 'contemplative', 'twilight',
     'liminal', 'cosmic', 'otherworldly', 'spectral', 'transcendent',
     'somber', 'wistful', 'enigmatic', 'pensive', 'brooding'
-  ];
+]
 
-  const INSTRUMENTS = [
+INSTRUMENTS = [
     'piano', 'synthesizer', 'strings', 'guitar', 'cello', 'violin',
     'harp', 'flute', 'bells', 'drone', 'pads', 'bass', 'drums',
     'percussion', 'choir', 'vocals', 'keys', 'organ', 'brass',
     'woodwinds', 'electronic', 'analog synth', 'digital synth'
-  ];
+]
 
-  const PRODUCTION_STYLES = [
+PRODUCTION_STYLES = [
     'reverb-heavy', 'lo-fi', 'high-fidelity', 'distorted', 'clean',
     'layered', 'minimal', 'dense', 'spacious', 'compressed',
     'vintage', 'modern', 'raw', 'polished', 'tape-saturated'
-  ];
+]
 
-  // Lyrical themes
-  const LYRIC_THEMES = [
+# Lyrical themes
+LYRIC_THEMES = [
     'twilight realm', 'forgotten memories', 'cosmic drift', 'shadow dance',
     'eternal night', 'lost horizons', 'whispered dreams', 'void embrace',
     'silent echoes', 'fading light', 'ancient paths', 'distant stars',
     'mystic journey', 'time dissolving', 'spectral visions', 'endless drift',
     'crystal tears', 'broken mirrors', 'sacred emptiness', 'lunar descent'
-  ];
+]
 
-  const LYRIC_FRAGMENTS = [
+LYRIC_FRAGMENTS = [
     'wandering through', 'dissolving into', 'beneath the veil of',
     'lost within', 'echoing across', 'suspended in', 'drifting beyond',
     'wrapped in', 'falling through', 'ascending into', 'merged with',
     'calling from', 'reaching toward', 'bound by', 'freed from'
-  ];
+]
 
-  const LYRIC_IMAGES = [
+LYRIC_IMAGES = [
     'silver mist', 'crystal void', 'obsidian sky', 'amber glow',
     'phantom breath', 'twilight haze', 'stardust trail', 'moonlit path',
     'shadow waves', 'frost-touched air', 'velvet darkness', 'golden silence',
     'infinite shore', 'cosmic sea', 'temporal drift', 'ethereal flame'
-  ];
+]
 
-  // Chaos word generation (from original)
-  const generateChaosWord = () => {
-    const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'z'];
-    const consonantClusters = ['br', 'cr', 'dr', 'fr', 'gr', 'pr', 'tr', 'bl', 'cl', 'fl', 'gl', 'pl', 'sl'];
-    const vowels = ['a', 'e', 'i', 'o', 'u', 'ae', 'ea', 'ia', 'io', 'ou'];
-    const endings = ['', 'n', 's', 'x', 'r', 'l', 'th', 'sh', 'nt', 'st'];
+# ---------------------------
+# Chaos word generation
+# ---------------------------
+def generate_chaos_word():
+    """Generate a mystical-sounding made-up word using syllable patterns"""
+    consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'z']
+    consonant_clusters = ['br', 'cr', 'dr', 'fr', 'gr', 'pr', 'tr', 'bl', 'cl', 'fl', 'gl', 'pl', 'sl']
+    vowels = ['a', 'e', 'i', 'o', 'u', 'ae', 'ea', 'ia', 'io', 'ou']
+    endings = ['', 'n', 's', 'x', 'r', 'l', 'th', 'sh', 'nt', 'st']
     
-    const numSyllables = Math.random() < 0.7 ? 2 : Math.random() < 0.5 ? 1 : 3;
-    let word = '';
+    num_syllables = random.choice([1, 2, 2, 3])  # Weighted toward 2 syllables
+    word = ''
     
-    for (let i = 0; i < numSyllables; i++) {
-      if (Math.random() < 0.4) {
-        word += consonantClusters[Math.floor(Math.random() * consonantClusters.length)];
-      } else {
-        word += consonants[Math.floor(Math.random() * consonants.length)];
-      }
-      word += vowels[Math.floor(Math.random() * vowels.length)];
-      if (i === numSyllables - 1 && Math.random() < 0.6) {
-        word += endings[Math.floor(Math.random() * endings.length)];
-      }
-    }
-    return word;
-  };
-
-  const generateLyrics = (useChaos) => {
-    const lines = [];
-    const numVerses = Math.random() < 0.5 ? 2 : 3;
+    for i in range(num_syllables):
+        if random.random() < 0.4:
+            word += random.choice(consonant_clusters)
+        else:
+            word += random.choice(consonants)
+        
+        word += random.choice(vowels)
+        
+        if i == num_syllables - 1 and random.random() < 0.6:
+            word += random.choice(endings)
     
-    for (let v = 0; v < numVerses; v++) {
-      const theme = useChaos ? generateChaosWord() : LYRIC_THEMES[Math.floor(Math.random() * LYRIC_THEMES.length)];
-      const fragment = LYRIC_FRAGMENTS[Math.floor(Math.random() * LYRIC_FRAGMENTS.length)];
-      const image1 = useChaos ? generateChaosWord() : LYRIC_IMAGES[Math.floor(Math.random() * LYRIC_IMAGES.length)];
-      const image2 = useChaos ? generateChaosWord() : LYRIC_IMAGES[Math.floor(Math.random() * LYRIC_IMAGES.length)];
-      
-      lines.push(`${fragment} ${theme}`);
-      lines.push(`where ${image1} meets ${image2}`);
-      if (v < numVerses - 1) lines.push('');
-    }
+    return word
+
+def generate_lyrics(use_chaos):
+    """Generate surreal, atmospheric lyrics"""
+    lines = []
+    num_verses = random.choice([2, 2, 3])  # Weighted toward 2 verses
     
-    return lines.join('\n');
-  };
-
-  const generatePrompt = () => {
-    const genre1 = GENRES[Math.floor(Math.random() * GENRES.length)];
-    let genre2 = GENRES[Math.floor(Math.random() * GENRES.length)];
-    while (genre2 === genre1) {
-      genre2 = GENRES[Math.floor(Math.random() * GENRES.length)];
-    }
+    for v in range(num_verses):
+        theme = generate_chaos_word() if use_chaos else random.choice(LYRIC_THEMES)
+        fragment = random.choice(LYRIC_FRAGMENTS)
+        image1 = generate_chaos_word() if use_chaos else random.choice(LYRIC_IMAGES)
+        image2 = generate_chaos_word() if use_chaos else random.choice(LYRIC_IMAGES)
+        
+        lines.append(f"{fragment} {theme}")
+        lines.append(f"where {image1} meets {image2}")
+        if v < num_verses - 1:
+            lines.append('')
     
-    const mood = pureChaosMood ? generateChaosWord() : MOODS[Math.floor(Math.random() * MOODS.length)];
-    const instrument1 = INSTRUMENTS[Math.floor(Math.random() * INSTRUMENTS.length)];
-    const instrument2 = INSTRUMENTS[Math.floor(Math.random() * INSTRUMENTS.length)];
-    const production = PRODUCTION_STYLES[Math.floor(Math.random() * PRODUCTION_STYLES.length)];
+    return '\n'.join(lines)
+
+def generate_prompt(instrumental_mode, add_metatags, pure_chaos_mood):
+    """Generate Suno prompt with style tags"""
+    genre1 = random.choice(GENRES)
+    genre2 = random.choice([g for g in GENRES if g != genre1])
     
-    let promptText = `${genre1}, ${genre2}, ${mood}`;
+    mood = generate_chaos_word() if pure_chaos_mood else random.choice(MOODS)
+    instrument1 = random.choice(INSTRUMENTS)
+    instrument2 = random.choice(INSTRUMENTS)
+    production = random.choice(PRODUCTION_STYLES)
     
-    if (addMetatags) {
-      promptText += `, ${instrument1}, ${instrument2}, ${production}`;
-      
-      // Add some random technical tags
-      const bpm = 60 + Math.floor(Math.random() * 80); // 60-140 BPM
-      if (Math.random() < 0.5) {
-        promptText += `, ${bpm}bpm`;
-      }
-    }
+    prompt_text = f"{genre1}, {genre2}, {mood}"
     
-    setPrompt(promptText);
+    if add_metatags:
+        prompt_text += f", {instrument1}, {instrument2}, {production}"
+        
+        # Add some random technical tags
+        if random.random() < 0.5:
+            bpm = random.randint(60, 140)
+            prompt_text += f", {bpm}bpm"
     
-    if (!instrumentalMode) {
-      setLyrics(generateLyrics(pureChaosMood));
-    } else {
-      setLyrics('[Instrumental]');
-    }
-  };
+    if instrumental_mode:
+        lyrics_text = "[Instrumental]"
+    else:
+        lyrics_text = generate_lyrics(pure_chaos_mood)
+    
+    return prompt_text, lyrics_text
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+# ---------------------------
+# Streamlit UI
+# ---------------------------
+if "prompt" not in st.session_state:
+    st.session_state.prompt = ""
+    st.session_state.lyrics = ""
 
-  return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0a0a0f 0%, #1a0a1f 100%)',
-      color: '#e8e6e3',
-      fontFamily: "'Courier New', monospace",
-      padding: '2rem'
-    }}>
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        background: 'rgba(0, 0, 0, 0.5)',
-        borderRadius: '12px',
-        padding: '2rem',
-        backdropFilter: 'blur(10px)'
-      }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <Music size={40} color="#c946ff" />
-            <h1 style={{ color: '#c946ff', margin: 0 }}>Suno Chaos Generator</h1>
-            <Sparkles size={40} color="#c946ff" />
-          </div>
-          <p style={{ color: '#a8a6a3', fontStyle: 'italic' }}>Surreal music prompt generation for Suno AI</p>
-        </div>
+col1, col2 = st.columns([1, 2])
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
-          {/* Options Panel */}
-          <div>
-            <h2 style={{ color: '#ff8c00', fontSize: '1.5rem', marginBottom: '1.5rem' }}>Options</h2>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={instrumentalMode}
-                  onChange={(e) => setInstrumentalMode(e.target.checked)}
-                  style={{ accentColor: '#c946ff' }}
-                />
-                <span> Instrumental (no lyrics)</span>
-              </label>
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={addMetatags}
-                  onChange={(e) => setAddMetatags(e.target.checked)}
-                  style={{ accentColor: '#c946ff' }}
-                />
-                <span>Add detailed metatags</span>
-              </label>
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={pureChaosMood}
-                  onChange={(e) => setPureChaosMood(e.target.checked)}
-                  style={{ accentColor: '#c946ff' }}
-                />
-                <span>Pure Chaos Mode (invented words)</span>
-              </label>
-
-              <button
-                onClick={generatePrompt}
-                style={{
-                  marginTop: '1rem',
-                  padding: '1rem',
-                  background: '#c946ff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  transition: 'all 0.3s'
-                }}
-                onMouseOver={(e) => e.target.style.background = '#a635d9'}
-                onMouseOut={(e) => e.target.style.background = '#c946ff'}
-              >
-                Generate Suno Prompt
-              </button>
-            </div>
-
-            <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255, 140, 0, 0.1)', borderRadius: '8px', border: '1px solid #ff8c00' }}>
-              <h3 style={{ color: '#ff8c00', fontSize: '1rem', marginBottom: '0.5rem' }}>How to use:</h3>
-              <ol style={{ fontSize: '0.9rem', lineHeight: '1.6', paddingLeft: '1.2rem' }}>
+with col1:
+    st.header("Options")
+    
+    instrumental_mode = st.checkbox("Instrumental (no lyrics)", value=False)
+    add_metatags = st.checkbox("Add detailed metatags", value=True)
+    pure_chaos_mood = st.checkbox("Pure Chaos Mode (invented words)", value=False)
+    
+    if st.button("Generate Suno Prompt"):
+        st.session_state.prompt, st.session_state.lyrics = generate_prompt(
+            instrumental_mode, add_metatags, pure_chaos_mood
+        )
+    
+    st.markdown(
+        """
+        <div class="info-box">
+            <h3 style="color: #ff8c00; font-size: 1rem; margin-bottom: 0.5rem;">How to use:</h3>
+            <ol style="font-size: 0.9rem; line-height: 1.6; padding-left: 1.2rem;">
                 <li>Generate a prompt</li>
                 <li>Copy the style tags</li>
                 <li>Paste into Suno's "Style of Music" field</li>
                 <li>Copy lyrics (if not instrumental)</li>
                 <li>Create your surreal track!</li>
-              </ol>
-            </div>
-          </div>
+            </ol>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-          {/* Output Panel */}
-          <div>
-            <h2 style={{ color: '#ff8c00', fontSize: '1.5rem', marginBottom: '1.5rem' }}>Output</h2>
-            
-            {prompt && (
-              <>
-                {/* Style Tags */}
-                <div style={{ marginBottom: '2rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <strong style={{ color: '#ff8c00' }}>Style Tags:</strong>
-                    <button
-                      onClick={() => copyToClipboard(prompt)}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        background: 'rgba(201, 70, 255, 0.2)',
-                        border: '1px solid #c946ff',
-                        borderRadius: '6px',
-                        color: '#c946ff',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}
-                    >
-                      {copied ? <Check size={16} /> : <Copy size={16} />}
-                      {copied ? 'Copied!' : 'Copy'}
-                    </button>
-                  </div>
-                  <div style={{
-                    background: 'rgba(10, 10, 12, 0.7)',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    border: '1px solid #2f2f31',
-                    fontFamily: 'monospace',
-                    whiteSpace: 'pre-wrap',
-                    wordWrap: 'break-word'
-                  }}>
-                    {prompt}
-                  </div>
-                </div>
-
-                {/* Lyrics */}
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <strong style={{ color: '#ff8c00' }}>Lyrics:</strong>
-                    <button
-                      onClick={() => copyToClipboard(lyrics)}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        background: 'rgba(201, 70, 255, 0.2)',
-                        border: '1px solid #c946ff',
-                        borderRadius: '6px',
-                        color: '#c946ff',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}
-                    >
-                      {copied ? <Check size={16} /> : <Copy size={16} />}
-                      {copied ? 'Copied!' : 'Copy'}
-                    </button>
-                  </div>
-                  <div style={{
-                    background: 'rgba(10, 10, 12, 0.7)',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    border: '1px solid #2f2f31',
-                    fontFamily: 'monospace',
-                    whiteSpace: 'pre-wrap',
-                    wordWrap: 'break-word',
-                    minHeight: '200px'
-                  }}>
-                    {lyrics || 'Generate a prompt to see lyrics here...'}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {!prompt && (
-              <div style={{
-                background: 'rgba(10, 10, 12, 0.7)',
-                padding: '3rem',
-                borderRadius: '8px',
-                border: '1px solid #2f2f31',
-                textAlign: 'center',
-                color: '#a8a6a3'
-              }}>
+with col2:
+    st.header("Output")
+    
+    if st.session_state.prompt:
+        st.markdown("**Style Tags** _(click the copy icon in the top-right corner):_")
+        st.code(st.session_state.prompt, language=None)
+        
+        st.markdown("**Lyrics** _(click the copy icon in the top-right corner):_")
+        st.code(st.session_state.lyrics, language=None)
+    else:
+        st.markdown(
+            """
+            <div style="background: rgba(10,10,12,0.7); padding: 3rem; border-radius: 8px; 
+                        border: 1px solid #2f2f31; text-align: center; color: #a8a6a3;">
                 Click "Generate Suno Prompt" to create your surreal music prompt
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-        {/* Footer */}
-        <div style={{ marginTop: '3rem', textAlign: 'center', color: '#a8a6a3', fontSize: '0.9rem' }}>
-          <p>Adapted from ChaosPrompt by <a href="https://x.com/Farah_ai_" style={{ color: '#c946ff' }}>@Farah_ai_</a></p>
-          <p style={{ fontStyle: 'italic', marginTop: '0.5rem' }}>~ Let the chaos harmonize ~</p>
-        </div>
-      </div>
+st.markdown("---")
+st.markdown(
+    """
+    <div style="text-align: center; color: #a8a6a3; font-size: 0.9rem;">
+        <p>Adapted from ChaosPrompt by <a href="https://x.com/Farah_ai_" style="color: #c946ff;">@Farah_ai_</a></p>
+        <p style="font-style: italic; margin-top: 0.5rem;">~ Let the chaos harmonize ~</p>
     </div>
-  );
-};
-
-export default SunoPromptGenerator;
-
-
-
+    """,
+    unsafe_allow_html=True
+)
