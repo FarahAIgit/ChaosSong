@@ -193,7 +193,7 @@ const SunoPromptGenerator = () => {
                   onChange={(e) => setAddMetatags(e.target.checked)}
                   style={{ accentColor: '#c946ff' }}
                 />
-                <span>🏷️ Add detailed metatags</span>
+                <span>Add detailed metatags</span>
               </label>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -344,4 +344,5 @@ const SunoPromptGenerator = () => {
 };
 
 export default SunoPromptGenerator;
+
 
